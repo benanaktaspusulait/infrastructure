@@ -1,0 +1,19 @@
+server:
+  persistentVolume:
+    size: 50Gi
+  retention: 15d
+
+alertmanager:
+  persistentVolume:
+    size: 10Gi
+
+grafana:
+  persistence:
+    size: 10Gi
+  adminPassword: admin  # Should be changed in production
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true 

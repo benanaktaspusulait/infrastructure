@@ -1,0 +1,12 @@
+extraArgs:
+  - --collector.textfile.directory=/var/lib/node_exporter/textfile
+  - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+
+extraVolumeMounts:
+  - name: textfile
+    mountPath: /var/lib/node_exporter/textfile
+    readOnly: true
+
+extraVolumes:
+  - name: textfile
+    emptyDir: {} 

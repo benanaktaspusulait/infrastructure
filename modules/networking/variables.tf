@@ -37,4 +37,16 @@ variable "enable_nat" {
   description = "Enable Cloud NAT"
   type        = bool
   default     = true
+}
+
+variable "network_policy_default_deny" {
+  description = "Enable default deny network policy"
+  type        = bool
+  default     = true
+}
+
+variable "network_policy_allow_internal" {
+  description = "Allow internal network communication"
+  type        = bool
+  default     = true
 } 

@@ -20,40 +20,71 @@ provider "helm" {
 module "kubernetes" {
   source = "../../modules/kubernetes"
   
-  environment = "test"
   cluster_name = "test-cluster"
-  node_count = 3
-  node_size = "Standard_D4s_v3"
+  network = "test-network"
+  subnetwork = "test-subnetwork"
+  node_pools = [
+    {
+      name         = "default-pool"
+      node_count   = 3
+      machine_type = "Standard_D4s_v3"
+      disk_size_gb = 100
+      disk_type    = "StandardSSD_LRS"
+    }
+  ]
+  kubernetes_version = "1.28.0"
+  enable_private_nodes = true
+  enable_private_endpoint = true
+  master_ipv4_cidr_block = "172.16.0.0/28"
 }
 
 module "networking" {
   source = "../../modules/networking"
   
   environment = "test"
-  cluster_id = module.kubernetes.cluster_id
   vpc_cidr = "10.1.0.0/16"
+  region = "us-central1"
+  enable_private_subnets = true
+  enable_public_subnets = true
+  subnet_count = 3
+  enable_nat = true
 }
 
 module "storage" {
   source = "../../modules/storage"
   
   environment = "test"
-  cluster_id = module.kubernetes.cluster_id
-  storage_class = "standard"
+  postgresql_storage_size = "10Gi"
+  redis_storage_size = "5Gi"
+  kafka_storage_size = "20Gi"
+  storage_reclaim_policy = "Retain"
+  enable_backup = true
+  backup_retention_days = 30
 }
 
 module "monitoring" {
   source = "../../modules/monitoring"
   
   environment = "test"
-  cluster_id = module.kubernetes.cluster_id
+  prometheus_storage_size = "50Gi"
+  prometheus_retention_days = 15
+  grafana_storage_size = "10Gi"
+  alertmanager_storage_size = "10Gi"
+  enable_prometheus = true
+  enable_grafana = true
+  enable_alertmanager = true
 }
 
 module "security" {
   source = "../../modules/security"
   
   environment = "test"
-  cluster_id = module.kubernetes.cluster_id
+  postgresql_password = var.postgresql_password
+  redis_password = var.redis_password
+  kafka_password = var.kafka_password
+  enable_network_policies = true
+  enable_pod_security_policy = true
+  enable_rbac = true
 }
 
 # Helm releases

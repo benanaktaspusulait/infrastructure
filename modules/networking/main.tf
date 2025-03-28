@@ -1,80 +1,83 @@
-# Create VPC
-resource "kubernetes_network" "vpc" {
-  name = "${var.environment}-vpc"
-  cidr = var.vpc_cidr
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.25.0"
+    }
+  }
 }
 
-# Create subnets
-resource "kubernetes_network_subnet" "private" {
-  count = 3
-  name  = "${var.environment}-private-subnet-${count.index + 1}"
-  network = kubernetes_network.vpc.name
-  cidr = cidrsubnet(var.vpc_cidr, 8, count.index)
-  region = var.region
-  private_ip_google_access = true
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+  config_context = "docker-desktop"  # or your local context name
 }
 
-resource "kubernetes_network_subnet" "public" {
-  count = 3
-  name  = "${var.environment}-public-subnet-${count.index + 1}"
-  network = kubernetes_network.vpc.name
-  cidr = cidrsubnet(var.vpc_cidr, 8, count.index + 3)
-  region = var.region
-}
+# Networking for on-premise Kubernetes must be configured manually or with other tools.
+# Replace the following resources with manual configurations or appropriate modules.
 
-# Create firewall rules
-resource "kubernetes_firewall" "internal" {
-  name    = "${var.environment}-internal"
-  network = kubernetes_network.vpc.name
+# Placeholder for VPC equivalent
+# resource "kubernetes_network" "vpc" {
+#   ...existing code...
+# }
 
-  allow {
-    protocol = "icmp"
+# Placeholder for private subnet equivalent
+# resource "kubernetes_network_subnet" "private" {
+#   ...existing code...
+# }
+
+# Placeholder for public subnet equivalent
+# resource "kubernetes_network_subnet" "public" {
+#   ...existing code...
+# }
+
+# Placeholder for internal firewall equivalent
+# resource "kubernetes_firewall" "internal" {
+#   ...existing code...
+# }
+
+# Placeholder for NAT equivalent
+# resource "kubernetes_cloud_nat" "nat" {
+#   ...existing code...
+# }
+
+# Create service for internal communication
+resource "kubernetes_service" "internal" {
+  metadata {
+    name = "internal-service"
+    namespace = "default"
   }
 
-  allow {
-    protocol = "tcp"
-    ports    = ["0-65535"]
+  spec {
+    selector = {
+      app = "internal"
+    }
+
+    port {
+      port        = 80
+      target_port = "http"
+    }
+
+    type = "ClusterIP"
   }
-
-  allow {
-    protocol = "udp"
-    ports    = ["0-65535"]
-  }
-
-  source_ranges = [var.vpc_cidr]
-  target_tags   = ["internal"]
-}
-
-# Create Cloud NAT
-resource "kubernetes_cloud_nat" "nat" {
-  name    = "${var.environment}-nat"
-  network = kubernetes_network.vpc.name
-  region  = var.region
-
-  nat_ip_allocate_option = "AUTO_ONLY"
-  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 
 # Outputs
 output "vpc_id" {
-  value = kubernetes_network.vpc.id
+  value = "default"
 }
 
 output "vpc_name" {
-  value = kubernetes_network.vpc.name
+  value = "default"
 }
 
 output "subnet_ids" {
-  value = concat(
-    kubernetes_network_subnet.private[*].id,
-    kubernetes_network_subnet.public[*].id
-  )
+  value = ["default"]
 }
 
 output "private_subnet_ids" {
-  value = kubernetes_network_subnet.private[*].id
+  value = ["default"]
 }
 
 output "public_subnet_ids" {
-  value = kubernetes_network_subnet.public[*].id
-} 
+  value = ["default"]
+}

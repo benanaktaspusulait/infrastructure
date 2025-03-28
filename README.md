@@ -29,6 +29,45 @@ The project consists of:
 - Backup:
   - Velero
 
+## Project Structure
+
+```
+.
+├── environments/
+│   ├── dev/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   ├── terraform.tfvars
+│   │   ├── terraform.tfvars.template
+│   │   ├── LOCAL_SETUP.md
+│   │   └── SECURITY.md
+│   ├── test/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── terraform.tfvars
+│   ├── preprod/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── terraform.tfvars
+│   └── prod/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── terraform.tfvars
+├── modules/
+│   ├── kubernetes/
+│   ├── networking/
+│   ├── storage/
+│   ├── monitoring/
+│   ├── security/
+│   ├── backup/
+│   └── compliance/
+└── helm/
+    ├── argocd/
+    ├── istio/
+    └── applications/
+```
+
 ## Environment Structure
 
 The project supports multiple environments:
@@ -128,9 +167,9 @@ The project supports multiple environments:
 
 ### 1. Infrastructure Setup
 
-1. Initialize and apply Terraform:
+1. Initialize and apply Terraform for your environment:
    ```bash
-   cd terraform/backend
+   cd environments/dev
    terraform init
    terraform plan
    terraform apply
@@ -266,115 +305,4 @@ Network policies are automatically applied by ArgoCD. The policies enforce:
    ```
 
 3. Check ArgoCD sync status:
-   ```bash
-   argocd app list
    ```
-
-4. Verify monitoring:
-   ```bash
-   kubectl get pods -n monitoring
-   ```
-
-## Local Development Tips
-
-1. Access services locally:
-   ```bash
-   # Gateway
-   kubectl port-forward -n gateway svc/gateway-application 8080:8080
-   
-   # Frontend
-   kubectl port-forward -n frontend svc/react-frontend 3000:80
-   
-   # Config
-   kubectl port-forward -n config svc/config-application 8888:8888
-   ```
-
-2. View logs:
-   ```bash
-   kubectl logs -f deployment/<deployment-name> -n <namespace>
-   ```
-
-3. Debug Istio:
-   ```bash
-   istioctl proxy-config
-   ```
-
-4. Check ArgoCD status:
-   ```bash
-   argocd app get <app-name>
-   ```
-
-## Maintenance
-
-### Regular Updates
-
-1. Update applications:
-   ```bash
-   kubectl patch application <app-name> -n argocd --type merge -p '{"spec":{"source":{"targetRevision":"<new-version>"}}}'
-   ```
-
-2. Update security policies:
-   ```bash
-   kubectl apply -f modules/compliance/policies/
-   ```
-
-### Backup and Recovery
-
-1. Create manual backup:
-   ```bash
-   velero backup create manual-backup
-   ```
-
-2. Restore from backup:
-   ```bash
-   velero restore create --from-backup manual-backup
-   ```
-
-## Troubleshooting
-
-### Common Issues
-
-1. Pod startup issues:
-   ```bash
-   kubectl describe pod <pod-name>
-   kubectl logs <pod-name>
-   ```
-
-2. Network connectivity:
-   ```bash
-   kubectl exec -it <pod-name> -- nc -zv <service-name> <port>
-   ```
-
-3. Storage issues:
-   ```bash
-   kubectl describe pvc <pvc-name>
-   ```
-
-### Logs and Debugging
-
-1. View application logs:
-   ```bash
-   kubectl logs -f deployment/<deployment-name>
-   ```
-
-2. Debug Istio:
-   ```bash
-   istioctl proxy-config
-   ```
-
-3. Check ArgoCD status:
-   ```bash
-   argocd app get <app-name>
-   ```
-
-## Contributing
-
-1. Create a feature branch
-2. Make your changes
-3. Submit a pull request
-4. Get code review
-5. Merge after approval
-
-## License
-
-[Your License Here] 

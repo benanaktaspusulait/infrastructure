@@ -1,0 +1,17 @@
+persistentVolume:
+  size: 10Gi
+
+config:
+  global:
+    resolve_timeout: 5m
+  route:
+    group_by: ['job']
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 4h
+    receiver: 'slack-notifications'
+  receivers:
+    - name: 'slack-notifications'
+      slack_configs:
+        - channel: '#alerts'
+          send_resolved: true 

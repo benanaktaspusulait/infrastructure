@@ -1,19 +1,56 @@
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.25.0"
+    }
+  }
+}
+
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+  config_context = "docker-desktop"  # or your local context name
+}
+
 # Create security namespace
 resource "kubernetes_namespace" "security" {
   metadata {
     name = "security"
+    labels = {
+      "app.kubernetes.io/managed-by" = "terraform"
+    }
+  }
+  timeouts {
+    delete = "10m"
+  }
+  depends_on = []
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations
+    ]
   }
 }
 
-# Create RBAC roles and bindings
+# Create admin cluster role
 resource "kubernetes_cluster_role" "admin" {
   metadata {
     name = "admin"
+    labels = {
+      "app.kubernetes.io/managed-by" = "terraform"
+    }
   }
   rule {
     api_groups = [""]
     resources  = ["*"]
     verbs      = ["*"]
+  }
+  depends_on = []
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations
+    ]
   }
 }
 
@@ -30,6 +67,12 @@ resource "kubernetes_cluster_role_binding" "admin" {
     kind      = "Group"
     name      = "admin"
     api_group = "rbac.authorization.k8s.io"
+  }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations
+    ]
   }
 }
 
@@ -55,48 +98,12 @@ resource "kubernetes_network_policy" "allow_internal" {
     policy_types = ["Ingress", "Egress"]
     ingress {
       from {
-        pod_selector {}
+        namespace_selector {}
       }
     }
     egress {
       to {
-        pod_selector {}
-      }
-    }
-  }
-}
-
-# Create Pod Security Policy
-resource "kubernetes_pod_security_policy" "restricted" {
-  metadata {
-    name = "restricted"
-  }
-  spec {
-    privileged                 = false
-    allow_privilege_escalation = false
-    required_drop_capabilities = ["ALL"]
-    volumes                    = ["configMap", "emptyDir", "projected", "secret", "downwardAPI"]
-    host_network               = false
-    host_ipc                   = false
-    host_pid                   = false
-    run_as_user {
-      rule = "MustRunAsNonRoot"
-    }
-    se_linux {
-      rule = "RunAsAny"
-    }
-    supplemental_groups {
-      rule = "MustRunAs"
-      ranges {
-        min = 1
-        max = 65535
-      }
-    }
-    fs_group {
-      rule = "MustRunAs"
-      ranges {
-        min = 1
-        max = 65535
+        namespace_selector {}
       }
     }
   }
@@ -134,10 +141,6 @@ resource "kubernetes_config_map" "app_config" {
 # Outputs
 output "security_namespace" {
   value = kubernetes_namespace.security.metadata[0].name
-}
-
-output "pod_security_policy" {
-  value = kubernetes_pod_security_policy.restricted.metadata[0].name
 }
 
 output "network_policies" {

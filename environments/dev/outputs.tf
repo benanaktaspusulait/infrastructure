@@ -24,22 +24,22 @@ output "subnet_ids" {
   value       = module.networking.subnet_ids
 }
 
-output "storage_class" {
-  description = "The default storage class"
-  value       = module.storage.storage_class
+output "storage_classes" {
+  description = "The storage classes"
+  value       = module.storage.storage_classes
 }
 
 output "monitoring_endpoint" {
   description = "The endpoint of the monitoring stack"
-  value       = module.monitoring.endpoint
+  value       = module.monitoring.prometheus_endpoint
 }
 
 output "argocd_server_url" {
   description = "The URL of the ArgoCD server"
-  value       = helm_release.argocd.metadata[0].annotations["argocd.argoproj.io/server-url"]
+  value       = "https://argocd-server.argocd.svc.cluster.local"
 }
 
 output "istio_ingress_gateway" {
   description = "The Istio ingress gateway endpoint"
-  value       = helm_release.istio.metadata[0].annotations["istio.io/ingress-gateway"]
+  value       = "http://istio-ingressgateway.istio-system.svc.cluster.local"
 } 

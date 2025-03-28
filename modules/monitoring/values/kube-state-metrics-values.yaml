@@ -1,0 +1,18 @@
+rbac:
+  create: true
+
+serviceMonitor:
+  enabled: true
+
+metricRelabelings:
+  - sourceLabels: [__name__]
+    regex: kube_node_status_capacity_cpu_cores
+    targetLabel: node_cpu_capacity
+    replacement: $1
+    action: replace
+
+  - sourceLabels: [__name__]
+    regex: kube_node_status_capacity_memory_bytes
+    targetLabel: node_memory_capacity
+    replacement: $1
+    action: replace 

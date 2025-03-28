@@ -1,0 +1,44 @@
+# Environment Configuration
+environment = "dev"
+storage_path = "/data"
+storage_sizes = {
+  kafka-data = "20Gi"
+  redis-data = "5Gi"
+  postgresql-data = "10Gi"
+}
+
+# Database Credentials
+postgresql_user = "REPLACE_WITH_POSTGRESQL_USER"
+postgresql_password = "REPLACE_WITH_POSTGRESQL_PASSWORD"
+
+# Message Broker Credentials
+kafka_user = "REPLACE_WITH_KAFKA_USER"
+kafka_password = "REPLACE_WITH_KAFKA_PASSWORD"
+
+# Cache Credentials
+redis_user = "REPLACE_WITH_REDIS_USER"
+redis_password = "REPLACE_WITH_REDIS_PASSWORD"
+
+# Application Security
+jwt_secret = "REPLACE_WITH_JWT_SECRET"
+encryption_key = "REPLACE_WITH_ENCRYPTION_KEY"
+admin_password = "REPLACE_WITH_ADMIN_PASSWORD"
+api_key = "REPLACE_WITH_API_KEY"
+
+# SSL/TLS Configuration
+ssl_certificate = "REPLACE_WITH_SSL_CERTIFICATE"
+ssl_private_key = "REPLACE_WITH_SSL_PRIVATE_KEY"
+
+# Authentication
+ldap_password = "REPLACE_WITH_LDAP_PASSWORD"
+
+# Vault Configuration
+vault_token = "REPLACE_WITH_VAULT_TOKEN"
+
+# Backup Configuration
+backup_encryption_key = "REPLACE_WITH_BACKUP_ENCRYPTION_KEY"
+
+# Monitoring Stack
+monitoring_password = "REPLACE_WITH_MONITORING_PASSWORD"
+alertmanager_password = "REPLACE_WITH_ALERTMANAGER_PASSWORD"
+grafana_admin_password = "REPLACE_WITH_GRAFANA_ADMIN_PASSWORD" 

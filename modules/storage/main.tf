@@ -1,3 +1,20 @@
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.25.0"
+    }
+  }
+}
+
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+  config_context = "docker-desktop"  # or your local context name
+  experiments {
+    manifest_resource = true
+  }
+}
+
 # Create Storage Classes
 resource "kubernetes_storage_class" "standard" {
   metadata {
@@ -87,6 +104,9 @@ resource "kubernetes_persistent_volume_claim" "postgresql" {
       }
     }
   }
+  timeouts {
+    create = "5m"
+  }
 }
 
 resource "kubernetes_persistent_volume_claim" "redis" {
@@ -102,6 +122,9 @@ resource "kubernetes_persistent_volume_claim" "redis" {
       }
     }
   }
+  timeouts {
+    create = "5m"
+  }
 }
 
 resource "kubernetes_persistent_volume_claim" "kafka" {
@@ -116,6 +139,9 @@ resource "kubernetes_persistent_volume_claim" "kafka" {
         storage = "200Gi"
       }
     }
+  }
+  timeouts {
+    create = "5m"
   }
 }
 
