@@ -1,0 +1,89 @@
+replicaCount: 3
+
+image:
+  repository: redis
+  tag: "7.2.0"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 6379
+
+persistence:
+  enabled: true
+  storageClass: "fast"
+  size: 50Gi
+  accessModes:
+    - ReadWriteOnce
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+config:
+  redis.conf: |
+    bind 0.0.0.0
+    port 6379
+    requirepass ${REDIS_PASSWORD}
+    maxmemory 1gb
+    maxmemory-policy allkeys-lru
+    appendonly yes
+    appendfsync everysec
+    no-appendfsync-on-rewrite no
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    slowlog-log-slower-than 10000
+    slowlog-max-len 128
+    notify-keyspace-events "Ex"
+    hash-max-ziplist-entries 512
+    hash-max-ziplist-value 64
+    list-max-ziplist-size -2
+    list-compress-depth 0
+    set-max-intset-entries 512
+    zset-max-ziplist-entries 128
+    zset-max-ziplist-value 64
+    activedefrag yes
+    active-defrag-ignore-bytes 100mb
+    active-defrag-threshold-lower 10
+    active-defrag-threshold-upper 100
+
+securityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+
+livenessProbe:
+  tcpSocket:
+    port: 6379
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  tcpSocket:
+    port: 6379
+  initialDelaySeconds: 15
+  periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - redis
+          topologyKey: kubernetes.io/hostname 

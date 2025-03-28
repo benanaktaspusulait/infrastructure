@@ -1,0 +1,82 @@
+replicaCount: 3
+
+image:
+  repository: confluentinc/cp-kafka
+  tag: "7.5.0"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 9092
+
+persistence:
+  enabled: true
+  storageClass: "fast"
+  size: 200Gi
+  accessModes:
+    - ReadWriteOnce
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+
+config:
+  server.properties: |
+    broker.id=${HOSTNAME##*-}
+    listeners=PLAINTEXT://:9092
+    advertised.listeners=PLAINTEXT://${POD_NAME}.${POD_NAMESPACE}.svc.cluster.local:9092
+    num.network.threads=3
+    num.io.threads=8
+    socket.send.buffer.bytes=102400
+    socket.receive.buffer.bytes=102400
+    socket.request.max.bytes=104857600
+    num.partitions=3
+    num.recovery.threads.per.data.dir=1
+    offsets.topic.replication.factor=3
+    transaction.state.log.replication.factor=3
+    transaction.state.log.min.isr=2
+    log.retention.hours=168
+    log.segment.bytes=1073741824
+    log.retention.check.interval.ms=300000
+    zookeeper.connect=zookeeper:2181
+    zookeeper.connection.timeout.ms=18000
+    group.initial.rebalance.delay.ms=0
+
+securityContext:
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+livenessProbe:
+  tcpSocket:
+    port: 9092
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  tcpSocket:
+    port: 9092
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - kafka
+        topologyKey: kubernetes.io/hostname 

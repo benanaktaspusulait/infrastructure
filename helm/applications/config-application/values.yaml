@@ -1,0 +1,93 @@
+replicaCount: 3
+
+image:
+  repository: your-registry/config-application
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 8888
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+config:
+  application:
+    name: config-service
+    server:
+      port: 8888
+    spring:
+      cloud:
+        config:
+          server:
+            git:
+              uri: https://github.com/your-org/config-repo
+              default-label: main
+              clone-on-start: true
+              timeout: 10
+              force-pull: true
+              deleteUntrackedBranches: true
+              basedir: /tmp/config-repo
+            health:
+              enabled: true
+              repositories:
+                config-repo:
+                  name: config-repo
+                  label: main
+                  timeout: 5
+
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8888
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8888
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+nodeSelector: {}
+tolerations: []
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - config-application
+          topologyKey: kubernetes.io/hostname 

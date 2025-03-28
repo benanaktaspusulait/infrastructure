@@ -1,0 +1,104 @@
+replicaCount: 3
+
+image:
+  repository: your-registry/java-backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: "istio"
+  annotations:
+    kubernetes.io/ingress.class: istio
+  hosts:
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - java-backend
+          topologyKey: kubernetes.io/hostname
+
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "prod"
+  - name: SPRING_DATASOURCE_URL
+    valueFrom:
+      configMapKeyRef:
+        name: app-config
+        key: spring.datasource.url
+  - name: SPRING_DATASOURCE_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: sensitive-data
+        key: postgresql-password
+  - name: SPRING_REDIS_HOST
+    valueFrom:
+      configMapKeyRef:
+        name: app-config
+        key: spring.redis.host
+  - name: SPRING_REDIS_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: sensitive-data
+        key: redis-password
+  - name: KAFKA_BOOTSTRAP_SERVERS
+    valueFrom:
+      configMapKeyRef:
+        name: app-config
+        key: kafka.bootstrap-servers
+  - name: KAFKA_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: sensitive-data
+        key: kafka-password
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  initialDelaySeconds: 60
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10 

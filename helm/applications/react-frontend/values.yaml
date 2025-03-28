@@ -1,0 +1,92 @@
+replicaCount: 3
+
+image:
+  repository: your-registry/react-frontend
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "istio"
+  annotations:
+    kubernetes.io/ingress.class: istio
+  hosts:
+    - host: frontend.your-domain.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+config:
+  environment:
+    - name: REACT_APP_API_URL
+      value: "https://gateway.your-domain.com"
+    - name: REACT_APP_CONFIG_URL
+      value: "https://gateway.your-domain.com/config"
+    - name: REACT_APP_FYS_URL
+      value: "https://gateway.your-domain.com/fys"
+    - name: REACT_APP_STOK_URL
+      value: "https://gateway.your-domain.com/stok"
+
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - react-frontend
+          topologyKey: kubernetes.io/hostname 
