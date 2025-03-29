@@ -22,6 +22,14 @@ resource "kubernetes_storage_class" "standard" {
   }
   storage_provisioner = "kubernetes.io/standard"
   reclaim_policy     = "Retain"
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      storage_provisioner,
+      reclaim_policy
+    ]
+  }
 }
 
 resource "kubernetes_storage_class" "fast" {
@@ -30,6 +38,14 @@ resource "kubernetes_storage_class" "fast" {
   }
   storage_provisioner = "kubernetes.io/fast"
   reclaim_policy     = "Retain"
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      storage_provisioner,
+      reclaim_policy
+    ]
+  }
 }
 
 # Create Persistent Volumes
@@ -50,6 +66,17 @@ resource "kubernetes_persistent_volume" "postgresql" {
       }
     }
   }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      spec[0].capacity,
+      spec[0].persistent_volume_source[0].host_path[0].path,
+      spec[0].persistent_volume_source[0].host_path[0].type,
+      spec[0].access_modes,
+      spec[0].storage_class_name
+    ]
+  }
 }
 
 resource "kubernetes_persistent_volume" "redis" {
@@ -68,6 +95,17 @@ resource "kubernetes_persistent_volume" "redis" {
         type = "DirectoryOrCreate"
       }
     }
+  }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      spec[0].capacity,
+      spec[0].persistent_volume_source[0].host_path[0].path,
+      spec[0].persistent_volume_source[0].host_path[0].type,
+      spec[0].access_modes,
+      spec[0].storage_class_name
+    ]
   }
 }
 
@@ -88,6 +126,17 @@ resource "kubernetes_persistent_volume" "kafka" {
       }
     }
   }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      spec[0].capacity,
+      spec[0].persistent_volume_source[0].host_path[0].path,
+      spec[0].persistent_volume_source[0].host_path[0].type,
+      spec[0].access_modes,
+      spec[0].storage_class_name
+    ]
+  }
 }
 
 # Create Persistent Volume Claims
@@ -104,8 +153,14 @@ resource "kubernetes_persistent_volume_claim" "postgresql" {
       }
     }
   }
-  timeouts {
-    create = "5m"
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      spec[0].resources[0].requests.storage,
+      spec[0].access_modes,
+      spec[0].storage_class_name
+    ]
   }
 }
 
@@ -122,8 +177,14 @@ resource "kubernetes_persistent_volume_claim" "redis" {
       }
     }
   }
-  timeouts {
-    create = "5m"
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      spec[0].resources[0].requests.storage,
+      spec[0].access_modes,
+      spec[0].storage_class_name
+    ]
   }
 }
 
@@ -140,8 +201,14 @@ resource "kubernetes_persistent_volume_claim" "kafka" {
       }
     }
   }
-  timeouts {
-    create = "5m"
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      spec[0].resources[0].requests.storage,
+      spec[0].access_modes,
+      spec[0].storage_class_name
+    ]
   }
 }
 
@@ -167,4 +234,4 @@ output "persistent_volume_claims" {
     redis      = kubernetes_persistent_volume_claim.redis.metadata[0].name
     kafka      = kubernetes_persistent_volume_claim.kafka.metadata[0].name
   }
-} 
+}

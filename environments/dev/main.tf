@@ -120,13 +120,20 @@ resource "helm_release" "argocd" {
 
 # Create namespaces
 resource "kubernetes_namespace" "namespaces" {
-  for_each = toset(["gateway", "config", "fys", "stok", "frontend", "argocd", "istio-system"])
+  for_each = toset(["gateway", "config", "fys", "stok", "frontend"])
 
   metadata {
     name = each.value
     labels = {
       name = each.value
     }
+  }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      metadata[0].name
+    ]
   }
 }
 
@@ -137,52 +144,12 @@ resource "kubernetes_storage_class" "local_storage" {
   }
   storage_provisioner = "k8s.io/minikube-hostpath"
   reclaim_policy     = "Retain"
-}
-
-# Create local persistent volumes
-resource "kubernetes_persistent_volume" "local_pvs" {
-  for_each = {
-    postgresql = { size = "100Gi", path = "/data/postgresql" }
-    redis      = { size = "50Gi", path = "/data/redis" }
-    kafka      = { size = "200Gi", path = "/data/kafka" }
-  }
-
-  metadata {
-    name = "${each.key}-pv"
-  }
-  spec {
-    capacity = {
-      storage = each.value.size
-    }
-    access_modes = ["ReadWriteOnce"]
-    storage_class_name = "standard"
-    persistent_volume_source {
-      host_path {
-        path = each.value.path
-        type = "DirectoryOrCreate"
-      }
-    }
-  }
-}
-
-# Create local persistent volume claims
-resource "kubernetes_persistent_volume_claim" "local_pvcs" {
-  for_each = {
-    postgresql = { size = "100Gi" }
-    redis      = { size = "50Gi" }
-    kafka      = { size = "200Gi" }
-  }
-
-  metadata {
-    name = "${each.key}-pvc"
-  }
-  spec {
-    access_modes = ["ReadWriteOnce"]
-    storage_class_name = "standard"
-    resources {
-      requests = {
-        storage = each.value.size
-      }
-    }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      storage_provisioner,
+      reclaim_policy
+    ]
   }
 } 

@@ -56,4 +56,8 @@ kubectl delete pvc postgresql-pvc -n default --ignore-not-found
 kubectl delete pvc redis-pvc -n default --ignore-not-found
 kubectl delete pvc kafka-pvc -n default --ignore-not-found
 
+
+kubectl delete pv postgresql-pv redis-pv kafka-pv
+kubectl delete pvc postgresql-pvc redis-pvc kafka-pvc
+
 echo "✅ Deletion complete. You can now safely run 'terraform apply'."
