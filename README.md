@@ -159,8 +159,8 @@ The project supports multiple environments:
 
 3. Create required directories for persistent storage:
    ```bash
-   sudo mkdir -p /data/{kafka-data,redis-data,postgresql-data}
-   sudo chmod 777 /data/{kafka-data,redis-data,postgresql-data}
+   sudo mkdir -p /data/{kafka,redis,postgresql}
+   sudo chmod 777 /data/{kafka,redis,postgresql}
    ```
 
 ## Deployment Steps

@@ -91,6 +91,9 @@ resource "kubernetes_manifest" "service_monitor" {
     }
   }
   depends_on = [helm_release.prometheus_operator]
+  timeouts {
+    create = "5m"
+  }
 }
 
 # Outputs

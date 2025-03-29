@@ -101,7 +101,7 @@ module "security" {
 
 # Helm releases
 resource "helm_release" "istio" {
-  name = "istio-${formatdate("YYYYMMDD-hhmmss", timestamp())}"
+  name = "istio"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart = "base"
   version = "1.20.0"
@@ -116,7 +116,7 @@ resource "helm_release" "istio" {
 }
 
 resource "helm_release" "argocd" {
-  name = "argocd-${formatdate("YYYYMMDD-hhmmss", timestamp())}"
+  name = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart = "argo-cd"
   version = "5.51.0"
@@ -139,9 +139,6 @@ resource "kubernetes_namespace" "namespaces" {
     labels = {
       name = each.value
     }
-  }
-  timeouts {
-    delete = "10m"
   }
   timeouts {
     delete = "10m"
