@@ -13,13 +13,16 @@ terraform {
 
 provider "kubernetes" {
   config_path = "~/.kube/config"
-  config_context = "docker-desktop"  # or your local context name
+  config_context = "docker-desktop"
+  experiments {
+    manifest_resource = true
+  }
 }
 
 provider "helm" {
   kubernetes {
     config_path = "~/.kube/config"
-    config_context = "docker-desktop"  # or your local context name
+    config_context = "docker-desktop"
   }
 }
 
@@ -34,6 +37,9 @@ resource "helm_release" "prometheus_operator" {
   force_update = true
   cleanup_on_fail = true
   replace = true
+  atomic = true
+  wait = true
+  timeout = 600
 
   values = [
     file("${path.module}/values/prometheus-values.yaml")

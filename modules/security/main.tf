@@ -51,7 +51,8 @@ resource "kubernetes_cluster_role" "admin" {
     ignore_changes = [
       metadata[0].labels,
       metadata[0].annotations,
-      rule
+      rule,
+      metadata[0].name
     ]
   }
 }
@@ -75,7 +76,8 @@ resource "kubernetes_cluster_role_binding" "admin" {
       metadata[0].labels,
       metadata[0].annotations,
       role_ref,
-      subject
+      subject,
+      metadata[0].name
     ]
   }
 }
@@ -95,7 +97,9 @@ resource "kubernetes_network_policy" "default_deny" {
       metadata[0].labels,
       metadata[0].annotations,
       spec[0].pod_selector,
-      spec[0].policy_types
+      spec[0].policy_types,
+      metadata[0].name,
+      metadata[0].namespace
     ]
   }
 }
@@ -126,7 +130,9 @@ resource "kubernetes_network_policy" "allow_internal" {
       spec[0].pod_selector,
       spec[0].policy_types,
       spec[0].ingress,
-      spec[0].egress
+      spec[0].egress,
+      metadata[0].name,
+      metadata[0].namespace
     ]
   }
 }

@@ -65,7 +65,8 @@ resource "kubernetes_service" "internal" {
       metadata[0].annotations,
       spec[0].selector,
       spec[0].port[0].target_port,
-      spec[0].type
+      spec[0].type,
+      spec[0].port[0].port
     ]
   }
 }

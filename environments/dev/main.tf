@@ -110,6 +110,9 @@ resource "helm_release" "istio" {
   force_update = true
   cleanup_on_fail = true
   replace = true
+  atomic = true
+  wait = true
+  timeout = 600
 }
 
 resource "helm_release" "argocd" {
@@ -122,6 +125,9 @@ resource "helm_release" "argocd" {
   force_update = true
   cleanup_on_fail = true
   replace = true
+  atomic = true
+  wait = true
+  timeout = 600
 }
 
 # Create namespaces
