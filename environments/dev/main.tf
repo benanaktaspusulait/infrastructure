@@ -74,18 +74,6 @@ module "storage" {
   backup_retention_days = 30
 }
 
-module "monitoring" {
-  source = "../../modules/monitoring"
-  
-  environment = "dev"
-  prometheus_storage_size = "50Gi"
-  prometheus_retention_days = 15
-  grafana_storage_size = "10Gi"
-  alertmanager_storage_size = "10Gi"
-  enable_prometheus = true
-  enable_grafana = true
-  enable_alertmanager = true
-}
 
 module "security" {
   source = "../../modules/security"

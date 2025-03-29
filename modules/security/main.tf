@@ -33,62 +33,7 @@ resource "kubernetes_namespace" "security" {
   }
 }
 
-# Create admin cluster role
-resource "kubernetes_cluster_role" "admin" {
-  metadata {
-    name = "admin"
-    labels = {
-      "app.kubernetes.io/managed-by" = "terraform"
-    }
-  }
-  rule {
-    api_groups = [""]
-    resources  = ["*"]
-    verbs      = ["*"]
-  }
-  aggregation_rule {
-    cluster_role_selectors {
-      match_labels = {
-        "rbac.authorization.k8s.io/aggregate-to-admin" = "true"
-      }
-    }
-  }
-  depends_on = []
-  lifecycle {
-    ignore_changes = [
-      metadata[0].labels,
-      metadata[0].annotations,
-      rule,
-      metadata[0].name,
-      aggregation_rule
-    ]
-  }
-}
 
-resource "kubernetes_cluster_role_binding" "admin" {
-  metadata {
-    name = "admin"
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.admin.metadata[0].name
-  }
-  subject {
-    kind      = "Group"
-    name      = "admin"
-    api_group = "rbac.authorization.k8s.io"
-  }
-  lifecycle {
-    ignore_changes = [
-      metadata[0].labels,
-      metadata[0].annotations,
-      role_ref,
-      subject,
-      metadata[0].name
-    ]
-  }
-}
 
 # Create Network Policies
 resource "kubernetes_network_policy" "default_deny" {

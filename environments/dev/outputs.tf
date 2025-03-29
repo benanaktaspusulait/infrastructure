@@ -29,10 +29,6 @@ output "storage_classes" {
   value       = module.storage.storage_classes
 }
 
-output "monitoring_endpoint" {
-  description = "The endpoint of the monitoring stack"
-  value       = module.monitoring.prometheus_endpoint
-}
 
 output "argocd_server_url" {
   description = "The URL of the ArgoCD server"
