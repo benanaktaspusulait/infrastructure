@@ -46,13 +46,21 @@ resource "kubernetes_cluster_role" "admin" {
     resources  = ["*"]
     verbs      = ["*"]
   }
+  aggregation_rule {
+    cluster_role_selectors {
+      match_labels = {
+        "rbac.authorization.k8s.io/aggregate-to-admin" = "true"
+      }
+    }
+  }
   depends_on = []
   lifecycle {
     ignore_changes = [
       metadata[0].labels,
       metadata[0].annotations,
       rule,
-      metadata[0].name
+      metadata[0].name,
+      aggregation_rule
     ]
   }
 }
@@ -92,6 +100,7 @@ resource "kubernetes_network_policy" "default_deny" {
     pod_selector {}
     policy_types = ["Ingress", "Egress"]
   }
+  depends_on = []
   lifecycle {
     ignore_changes = [
       metadata[0].labels,
@@ -123,6 +132,7 @@ resource "kubernetes_network_policy" "allow_internal" {
       }
     }
   }
+  depends_on = []
   lifecycle {
     ignore_changes = [
       metadata[0].labels,

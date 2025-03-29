@@ -140,12 +140,8 @@ resource "kubernetes_namespace" "namespaces" {
       name = each.value
     }
   }
-  lifecycle {
-    ignore_changes = [
-      metadata[0].labels,
-      metadata[0].annotations,
-      metadata[0].name
-    ]
+  timeouts {
+    delete = "10m"
   }
   timeouts {
     delete = "10m"
@@ -161,8 +157,6 @@ resource "kubernetes_storage_class" "local_storage" {
   reclaim_policy     = "Retain"
   lifecycle {
     ignore_changes = [
-      metadata[0].labels,
-      metadata[0].annotations,
       storage_provisioner,
       reclaim_policy
     ]
