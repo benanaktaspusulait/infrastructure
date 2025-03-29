@@ -60,4 +60,34 @@ kubectl delete pvc kafka-pvc -n default --ignore-not-found
 kubectl delete pv postgresql-pv redis-pv kafka-pv
 kubectl delete pvc postgresql-pvc redis-pvc kafka-pvc
 
+
+helm uninstall istio --namespace istio-system || helm uninstall istio
+helm uninstall argocd --namespace argocd || helm uninstall argocd
+helm uninstall prometheus-operator --namespace monitoring || helm uninstall prometheus-operator
+
+echo "⚠️ Deleting Kubernetes namespaces..."
+kubectl delete namespace frontend --ignore-not-found
+kubectl delete namespace stok --ignore-not-found
+kubectl delete namespace config --ignore-not-found
+kubectl delete namespace fys --ignore-not-found
+kubectl delete namespace gateway --ignore-not-found
+kubectl delete namespace security --ignore-not-found
+
+echo "⚠️ Deleting Storage Classes..."
+kubectl delete storageclass local-storage --ignore-not-found
+kubectl delete storageclass standard --ignore-not-found
+kubectl delete storageclass fast --ignore-not-found
+
+echo "⚠️ Deleting Cluster Roles and Bindings..."
+kubectl delete clusterrole admin --ignore-not-found
+kubectl delete clusterrolebinding admin --ignore-not-found
+
+echo "⚠️ Deleting Services..."
+kubectl delete service internal-service -n default --ignore-not-found
+
+echo "⚠️ Deleting Network Policies..."
+kubectl delete networkpolicy default-deny -n security --ignore-not-found
+kubectl delete networkpolicy allow-internal -n security --ignore-not-found
+
+
 echo "✅ Deletion complete. You can now safely run 'terraform apply'."

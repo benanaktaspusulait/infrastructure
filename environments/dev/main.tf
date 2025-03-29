@@ -107,6 +107,9 @@ resource "helm_release" "istio" {
   version = "1.20.0"
   namespace = "istio-system"
   create_namespace = true
+  force_update = true
+  cleanup_on_fail = true
+  replace = true
 }
 
 resource "helm_release" "argocd" {
@@ -116,6 +119,9 @@ resource "helm_release" "argocd" {
   version = "5.51.0"
   namespace = "argocd"
   create_namespace = true
+  force_update = true
+  cleanup_on_fail = true
+  replace = true
 }
 
 # Create namespaces

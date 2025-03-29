@@ -31,6 +31,9 @@ resource "helm_release" "prometheus_operator" {
   version    = "45.7.1"
   namespace  = "monitoring"
   create_namespace = true
+  force_update = true
+  cleanup_on_fail = true
+  replace = true
 
   values = [
     file("${path.module}/values/prometheus-values.yaml")

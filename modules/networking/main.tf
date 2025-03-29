@@ -59,6 +59,15 @@ resource "kubernetes_service" "internal" {
 
     type = "ClusterIP"
   }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      spec[0].selector,
+      spec[0].port[0].target_port,
+      spec[0].type
+    ]
+  }
 }
 
 # Outputs

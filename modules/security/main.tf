@@ -27,7 +27,8 @@ resource "kubernetes_namespace" "security" {
   lifecycle {
     ignore_changes = [
       metadata[0].labels,
-      metadata[0].annotations
+      metadata[0].annotations,
+      metadata[0].name
     ]
   }
 }
@@ -49,7 +50,8 @@ resource "kubernetes_cluster_role" "admin" {
   lifecycle {
     ignore_changes = [
       metadata[0].labels,
-      metadata[0].annotations
+      metadata[0].annotations,
+      rule
     ]
   }
 }
@@ -71,7 +73,9 @@ resource "kubernetes_cluster_role_binding" "admin" {
   lifecycle {
     ignore_changes = [
       metadata[0].labels,
-      metadata[0].annotations
+      metadata[0].annotations,
+      role_ref,
+      subject
     ]
   }
 }
@@ -85,6 +89,14 @@ resource "kubernetes_network_policy" "default_deny" {
   spec {
     pod_selector {}
     policy_types = ["Ingress", "Egress"]
+  }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      spec[0].pod_selector,
+      spec[0].policy_types
+    ]
   }
 }
 
@@ -106,6 +118,16 @@ resource "kubernetes_network_policy" "allow_internal" {
         namespace_selector {}
       }
     }
+  }
+  lifecycle {
+    ignore_changes = [
+      metadata[0].labels,
+      metadata[0].annotations,
+      spec[0].pod_selector,
+      spec[0].policy_types,
+      spec[0].ingress,
+      spec[0].egress
+    ]
   }
 }
 
