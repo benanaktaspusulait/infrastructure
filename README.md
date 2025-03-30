@@ -250,16 +250,105 @@ Network policies are automatically applied by ArgoCD. The policies enforce:
 1. Install monitoring stack:
    ```bash
    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-   helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
+   helm repo update
+   helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
    ```
 
-2. Access monitoring dashboards:
+2. Access Prometheus:
    ```bash
-   kubectl port-forward -n monitoring svc/grafana 3000:80
-   kubectl port-forward -n monitoring svc/alertmanager 9093:9093
+   kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring
+   ```
+   Then open http://localhost:9090 in your browser
+
+3. Access Grafana:
+   ```bash
+   kubectl port-forward svc/prometheus-grafana 3000:80 -n monitoring
+   ```
+   Then open http://localhost:3000 in your browser
+   - Default username: admin
+   - Default password: prom-operator
+
+4. Access Alert Manager:
+   ```bash
+   kubectl port-forward svc/prometheus-kube-prometheus-alertmanager 9093:9093 -n monitoring
+   ```
+   Then open http://localhost:9093 in your browser
+
+### 6. Kubernetes Dashboard
+
+1. Install Kubernetes Dashboard:
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
    ```
 
-### 6. Security Setup
+2. Create a dashboard admin user:
+   ```bash
+   kubectl apply -f helm/applications/dashboard-admin.yaml
+   ```
+
+3. Get the admin token:
+   ```bash
+   kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath="{.secrets[0].name}") -o go-template="{{.data.token | base64decode}}"
+   ```
+
+4. Access the dashboard:
+   ```bash
+   kubectl port-forward svc/kubernetes-dashboard 8443:443 -n kubernetes-dashboard
+   ```
+   Then open https://localhost:8443 in your browser
+   - Accept the self-signed certificate warning
+   - Use the token from step 3 to log in
+
+### 7. Monitoring Metrics
+
+The following metrics are available for monitoring:
+
+1. Gateway Application:
+   - Request count and latency
+   - Error rates
+   - Circuit breaker status
+   - Route statistics
+
+2. Config Application:
+   - Configuration refresh events
+   - Repository sync status
+   - Error rates
+
+3. FYS and Stok APIs:
+   - Request count and latency
+   - Error rates
+   - Database connection status
+   - Cache hit/miss rates
+
+4. Infrastructure:
+   - Node status and resources
+   - Pod status and resources
+   - Service health
+   - Network traffic
+
+### 8. Alerts
+
+The following alerts are configured:
+
+1. High-Level Alerts:
+   - Pod crash loops
+   - High error rates
+   - Resource usage thresholds
+   - Service availability
+
+2. Business Metrics:
+   - API response times
+   - Error rates by service
+   - Database connection issues
+   - Cache performance
+
+3. Infrastructure:
+   - Node health
+   - Disk space
+   - Memory pressure
+   - Network issues
+
+### 9. Security Setup
 
 1. Install security tools:
    ```bash
@@ -272,7 +361,7 @@ Network policies are automatically applied by ArgoCD. The policies enforce:
    kubectl create job --from=cronjob/compliance-report compliance-scan
    ```
 
-### 7. Backup Setup
+### 10. Backup Setup
 
 1. Configure Velero for local storage:
    ```bash
